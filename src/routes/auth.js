@@ -131,4 +131,38 @@ router.get('/me', authMiddleware, async (req, res) => {
     }
 });
 
+// GET /auth/users/:id — ім'я та прізвище користувача за id
+// Відповідь: { user: { id, firstName, lastName } }
+// Email і інші дані навмисно не віддаємо: маршрут відкритий (як і автор у списку правопорушень).
+// Щоб закрити його токеном, додай authMiddleware: router.get('/users/:id', authMiddleware, ...)
+router.get('/users/:id', async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+ 
+        if (!Number.isInteger(id) || id <= 0) {
+            return res.status(400).json({ error: 'Некоректний id' });
+        }
+ 
+        const { rows } = await pool.query(
+            'SELECT id, first_name, last_name FROM users WHERE id = $1',
+            [id]
+        );
+ 
+        if (!rows[0]) {
+            return res.status(404).json({ error: 'Користувача не знайдено' });
+        }
+ 
+        return res.json({
+            user: {
+                id: rows[0].id,
+                firstName: rows[0].first_name,
+                lastName: rows[0].last_name,
+            },
+        });
+    } catch (err) {
+        console.error('Помилка /auth/users/:id:', err);
+        return res.status(500).json({ error: 'Помилка сервера' });
+    }
+});
+
 module.exports = router;
