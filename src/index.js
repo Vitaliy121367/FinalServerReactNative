@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const pool = require('./db');
 const authRoutes = require('./routes/auth');
+const offensesRoutes = require('./routes/offenses');
 
 // Без секрету JWT сервер не має сенсу запускати
 if (!process.env.JWT_SECRET) {
@@ -30,6 +31,7 @@ app.get('/health', async (req, res) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/offenses', offensesRoutes);
 
 // Невідомий маршрут
 app.use((req, res) => {
